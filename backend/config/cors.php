@@ -23,6 +23,8 @@ return [
         'http://localhost:3000',
         'https://iesnuevohorizonte.com',
         'https://www.iesnuevohorizonte.com',
+        'https://automatizaciones-sga-back.0bbhvq.easypanel.host',
+        'https://automatizaciones-sga-back.0bbhvq.easypanel.host/'
     ],
 
     'allowed_origins_patterns' => [],
