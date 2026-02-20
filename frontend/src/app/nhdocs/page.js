@@ -1,10 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from '@/lib/axios';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, QrCode, Barcode as BarcodeIcon, FileText, Search, MapPin, User, Calendar, ArrowRight, Download } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
-import Barcode from 'react-barcode';
+import QRCode from 'react-qr-code';
+import JsBarCode from 'jsbarcode';
 
 export default function NHDocsPage() {
     const [codigo, setCodigo] = useState('');
@@ -12,6 +12,7 @@ export default function NHDocsPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [urlBase, setUrlBase] = useState('');
+    const barcodeRef = useRef(null);
 
     // --- NUEVO: Leer URL y Auto-Buscar si viene de un QR ---
     useEffect(() => {
@@ -27,6 +28,24 @@ export default function NHDocsPage() {
             realizarBusqueda(codigoUrl);
         }
     }, []);
+
+    // --- Renderizar código de barras cuando resultado cambia ---
+    useEffect(() => {
+        if (resultado && barcodeRef.current) {
+            try {
+                JsBarCode(barcodeRef.current, resultado.codigo, {
+                    format: "CODE128",
+                    width: 2,
+                    height: 40,
+                    displayValue: false,
+                    margin: 0,
+                    background: "transparent"
+                });
+            } catch (err) {
+                console.error('Error al generar código de barras:', err);
+            }
+        }
+    }, [resultado]);
 
     const realizarBusqueda = async (codigoBuscado) => {
         if (!codigoBuscado.trim()) return;
@@ -121,7 +140,7 @@ export default function NHDocsPage() {
                                     <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">VALIDACIÓN QR</span>
                                     <div className="bg-white p-1 border border-gray-200 rounded-lg">
                                         {/* El QR ahora contiene: https://tusitio.com/nhdocs?codigo=0001_REC_26 */}
-                                        <QRCodeSVG value={`${urlBase}/nhdocs?codigo=${resultado.codigo}`} size={64} />
+                                        <QRCode value={`${urlBase}/nhdocs?codigo=${resultado.codigo}`} size={64} level="H" includeMargin={false} />
                                     </div>
                                 </div>
                             </div>
@@ -134,14 +153,7 @@ export default function NHDocsPage() {
                                     <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">CÓDIGO DE BARRAS</span>
                                     <div className="w-full flex justify-end">
                                         <div className="scale-75 origin-right">
-                                            <Barcode 
-                                                value={resultado.codigo} 
-                                                width={1.5} 
-                                                height={40} 
-                                                displayValue={false} 
-                                                margin={0}
-                                                background="transparent"
-                                            />
+                                            <svg ref={barcodeRef}></svg>
                                         </div>
                                     </div>
                                     <span className="text-sm text-[#1F4E78] font-mono mt-1 font-bold">{resultado.codigo}</span>
