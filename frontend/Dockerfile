@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Instalamos dependencias (incluyendo las de desarrollo para que el build funcione)
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # 2. Imagen para construir el proyecto (Builder)
 FROM node:20-alpine AS builder
